@@ -1,5 +1,5 @@
 import {body} from "express-validator"
-import {blogsRepository} from '../../modules/blogs/blogs-repository';
+import {blogsRepository} from '../../features/blogs/blogs-repository';
 
 export const blogsTitleValidator = body('title')
     .isString().withMessage('title should be a string').trim().notEmpty().withMessage('title is required')

@@ -9,8 +9,5 @@ export const SETTINGS = {
         POSTS: '/posts',
         TESTING: '/testing',
     },
-    CREDENTIALS: {
-        LOGIN: "admin",
-        PASSWORD: "qwerty",
-    }
+    ADMIN: process.env.ADMIN || 'admin:qwerty',
 }

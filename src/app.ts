@@ -2,9 +2,9 @@ import express from "express";
 import cors from "cors";
 import {SETTINGS} from "./settings";
 import {Request, Response , NextFunction} from "express";
-import {blogsRouter} from './modules/blogs/blogs-router';
-import {postsRouter} from './modules/posts/post-router'
-import {testingRouter} from "./modules/testing";
+import {blogsRouter} from './features/blogs/blogs-router';
+import {postsRouter} from './features/posts/post-router'
+import {testingRouter} from "./features/testing";
 
 export const app = express();
 
