@@ -3,7 +3,7 @@ import {fromUTF8ToBase64} from "../../src/middlewares/admin-middleware";
 
 // готовые данные для переиспользования в тестах
 
-export const codedAuth = fromUTF8ToBase64(SETTINGS.ADMIN)
+export const codedAuth = fromUTF8ToBase64(`${SETTINGS.CREDENTIALS.LOGIN}:${SETTINGS.CREDENTIALS.PASSWORD}`)
 
 export const createString = (length: number) => {
     let s = '';

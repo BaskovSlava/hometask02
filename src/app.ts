@@ -14,7 +14,6 @@ app.use(express.json());
 app.use(cors())
 
 app.get("/", (req: Request, res: Response, next: NextFunction) => {
-
     res.status(200).json({version: '1.0'});
 })
 

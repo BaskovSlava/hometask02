@@ -73,6 +73,7 @@ describe('/posts', () => {
 
         expect(db.posts.length).toEqual(0)
     })
+
     it('should get empty array', async () => {
         setDB() // очистка базы данных если нужно
 
@@ -152,16 +153,17 @@ describe('/posts', () => {
             .send(post)
             .expect(204) // проверка на ошибку
 
-        expect(db.posts[0]).toEqual({...db.posts[0], ...post, blogName: dataset2.blogs[1].name})
+        expect(db.posts[0]).toEqual({...db.posts[0], ...post, blogName: dataset2.blogs[0].name})
     })
     it('shouldn\'t update 404', async () => {
-        setDB()
+        setDB(dataset1)
         const post: PostInputModel = {
             title: 't1',
             shortDescription: 's1',
             content: 'c1',
             blogId: dataset1.blogs[0].id,
         }
+
 
         const res = await req
             .put(SETTINGS.PATH.POSTS + '/1')

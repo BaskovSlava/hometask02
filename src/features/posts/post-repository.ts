@@ -1,37 +1,74 @@
 import {db} from '../../db/db'
+import {PostDbType} from "../../db/post-db-type";
+import {PostInputModel, PostViewModel} from "../../input-output-types/posts-types";
+import {BlogDbType} from "../../db/blog-db-type";
+import {blogsRepository} from "../blogs/blogs-repository";
+import {randomUUID} from "node:crypto";
 
 export const postsRepository = {
     getPosts() {
-        return db.post
+        return db.posts;
     },
-    createBlog(body:postsType){
-        const post = {
-            id: Date.now() + Math.random().toString(),
-            title: body.title,
-            author: body.author,
+    createPost(post: PostInputModel) {
+        let newPost: PostDbType = {
+            id:randomUUID(),
+            title: post.title,
+            content: post.content,
+            shortDescription: post.shortDescription,
+            blogId: post.blogId ,
+            blogName: "",
         }
-        db.posts = [...db.posts, post];
-        return blog.id;
+
+        const blogFind: BlogDbType | null = blogsRepository.findBlog(post.blogId);
+        if (blogFind) {
+                newPost.blogName = blogFind.name;
+        }
+
+        db.posts = [...db.posts, newPost];
+        return newPost.id;
     },
-    getPostsById(id: string) {
-        return db.posts.find(post => post.id === id);
+    findPost(id: string) {
+        const postFind =  db.posts.find(post => post.id === id);
+        if (postFind) {
+            return postFind
+        } else {
+            return null
+        }
     },
-    updatePosts(id: number, title: string) {
-        let post = posts.find(post => post.id === id);
-        if (post) {
-            post.title = title;
+    findPostAndMap(id: string) {
+        const post = this.findPost(id);
+        if (!post) {
+            throw new Error('Post not found');
+        }
+        return this.map(post);
+    },
+    updatePost(id: string, post: Partial<PostDbType>) {
+        const index = db.posts.findIndex(p => p.id === id);
+        if (index !== -1) {
+            db.posts[index] = {...db.posts[index], ...post};
             return true;
         } else {
             return false;
         }
     },
-    deleteBlog (id: number) {
-        for (let i = 0; i < posts.length; i++) {
-            if (posts[i].id === id) {
-                posts.splice(i, 1);
-                return true;
-            }
+    deletePost(id: string) {
+        const index = db.posts.findIndex(p => p.id === id);
+        if (index !== -1) {
+            db.posts.splice(index, 1);
+            return true;
+        } else {
+            return false;
         }
-        return false;
+    },
+    map(post: PostDbType) {
+        const postForOutput: PostViewModel = {
+            id: post.id,
+            title: post.title,
+            content: post.content,
+            shortDescription: post.shortDescription,
+            blogId: post.blogId,
+            blogName: post.blogName,
+        }
+        return postForOutput;
     }
 }

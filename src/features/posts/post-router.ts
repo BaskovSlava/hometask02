@@ -1,50 +1,61 @@
 import {Router, Request, Response, NextFunction} from "express";
-import {blogsRepository} from "./blogs-repository";
-import {BlogInputModel, BlogViewModel} from "../../input-output-types/blogs-types";
-import {blogValidators, findBlogValidator} from "./middlewares/blogValidators";
+import {postsRepository} from "./post-repository";
+import {PostInputModel, PostViewModel} from "../../input-output-types/posts-types";
+import {postValidators, findPostValidator, postIdValidator} from "./middlewares/postValidators";
 import {adminMiddleware} from "../../middlewares/admin-middleware";
+import {inputCheckErrorsMiddleware} from "../../middlewares/inputCheckErrorsMiddlewares";
 
-export const blogsRouter = Router();
+export const postsRouter = Router();
 
-export const blogsController = {
-    getBlogs(req: Request, res: Response<BlogViewModel[]>) {
-        // обращение не напрямую к базе данных, а через DAL
-        const blogs = blogsRepository.getBlogs(); // получения blogs из бд
-        res.status(200).json(blogs);
+export const postsController = {
+    getPosts(req: Request, res: Response<PostViewModel[]>) {
+        const posts = postsRepository.getPosts();
+        res.status(200).json(posts);
     },
-    createBlog(req: Request<any, any, BlogInputModel>, res: Response<BlogViewModel>) {
-        const newBlogId = blogsRepository.createBlog(req.body);
-        const newBlog = blogsRepository.findBlogAndMap(newBlogId);
+    createPost(req: Request<any, any, PostInputModel>, res: Response<PostViewModel>) {
+        const newPostId = postsRepository.createPost(req.body);
+        const newPost = postsRepository.findPostAndMap(newPostId);
 
         res
-            .status(200)
-            .json(newBlog);
+            .status(201)
+            .json(newPost);
     },
-    findBlog(req: Request<{ id: string }>, res: Response<BlogViewModel | {}>) {
-
+    findPost(req: Request<{ id: string }>, res: Response<PostViewModel | {}>) {
+        const post = postsRepository.findPost(req.params.id);
+        post ?
+            res
+                .status(200)
+                .json(post)
+            : res
+                .sendStatus(404)
     },
-    updateBlog(req: Request, res: Response) {
-        const isUpdated = blogsRepository.updateBlogs(+req.params.id, req.body.title)
-        if (isUpdated) {
-            const blog = blogsRepository.getBlogsById(+req.params.id)
-            res.send(blog)
+    updatePost(req: Request<{ id: string }>, res: Response<PostViewModel | {}>) {
+        const updated = postsRepository.updatePost(req.params.id, req.body);
+        if (updated) {
+            const post = postsRepository.findPost(req.params.id);
+            res.sendStatus(204);
         } else {
-            res.send(404)
+            res.sendStatus(404);
         }
     },
-    deleteBlog(req: Request<{ id: string }>, res: Response) {
-        const isDeleted = blogsRepository.deleteBlog(+req.params.id)
+    deletePost(req: Request<{ id: string }>, res: Response) {
+        const isDeleted = postsRepository.deletePost(req.params.id);
         if (isDeleted) {
-            res.send(204)
+            res.send(204);
         } else {
-            res.send(404)
+            res.send(404);
         }
     }
 }
 
-blogsRouter.get('/', blogsController.getBlogs);
-blogsRouter.post('/', ...blogValidators, blogsController.createBlog);
-blogsRouter.get('/:id', findBlogValidator, blogsController.findBlog);
-blogsRouter.delete('/:id', adminMiddleware, findBlogValidator, blogsController.deleteBlog);
-blogsRouter.put('/:id', findBlogValidator, ...blogValidators, blogsController.updateBlog);
+postsRouter.get('/', postsController.getPosts);
+postsRouter.post('/', ...postValidators, postsController.createPost);
+postsRouter.get('/:id', postIdValidator, inputCheckErrorsMiddleware, postsController.findPost);
+postsRouter.put('/:id', postIdValidator, ...postValidators, postsController.updatePost);
+postsRouter.delete('/:id', adminMiddleware, inputCheckErrorsMiddleware, postsController.deletePost);
+
+
+
+
+
 

@@ -15,9 +15,10 @@ describe('/blogs', () => {
 
         const res = await req
             .post(SETTINGS.PATH.BLOGS)
-            .set({"Authorization:": 'Basic ' + codedAuth})
-            .send(newBlog) // отправка данных
-            .expect(201)
+            .set({"Authorization": 'Basic ' + codedAuth})
+            .send(newBlog)
+           .expect(201)
+
 
         expect(res.body.name).toEqual(newBlog.name)
         expect(res.body.description).toEqual(newBlog.description)
@@ -39,8 +40,6 @@ describe('/blogs', () => {
             .send(newBlog) // отправка данных
             .expect(401)
 
-        // console.log(res.body)
-
         expect(db.blogs.length).toEqual(0)
     })
 
@@ -61,7 +60,7 @@ describe('/blogs', () => {
         expect(res.body.errorsMessages.length).toEqual(3)
         expect(res.body.errorsMessages[0].field).toEqual('name')
         expect(res.body.errorsMessages[1].field).toEqual('description')
-        expect(res.body.errorsMessages[3].field).toEqual('websiteUrl')
+        expect(res.body.errorsMessages[2].field).toEqual('websiteUrl')
 
         expect(db.blogs.length).toEqual(0)
     })
@@ -138,9 +137,7 @@ describe('/blogs', () => {
             .put(SETTINGS.PATH.BLOGS + '/' + dataset1.blogs[0].id)
             .set({'Authorization': 'Basic ' + codedAuth})
             .send(blog)
-            .expect(204) // проверка на ошибку
-
-        // console.log(res.body)
+            .expect(204)
 
         expect(db.blogs[0]).toEqual({...db.blogs[0], ...blog})
     })

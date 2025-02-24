@@ -1,6 +1,7 @@
 import {db} from '../../db/db'
 import {BlogDbType} from "../../db/blog-db-type";
 import {BlogInputModel, BlogViewModel} from "../../input-output-types/blogs-types";
+import {randomUUID} from "node:crypto";
 
 export const blogsRepository = {
     getBlogs() {
@@ -8,7 +9,7 @@ export const blogsRepository = {
     },
     createBlog(blog: BlogInputModel) {
         const newBlog: BlogDbType = {
-            id: new Date().toISOString() + Math.random(),
+            id:randomUUID(),
             name: blog.name,
             description: blog.description,
             websiteUrl: blog.websiteUrl,
@@ -17,29 +18,37 @@ export const blogsRepository = {
         return newBlog.id;
     },
     findBlog(id: string) {
-        return db.blogs.find(blog => blog.id === id);
+        const blog = db.blogs.find(blog => blog.id === id);
+        if (blog) {
+            return blog;
+        } else {
+            return null
+        }
     },
     findBlogAndMap(id: string) {
-        const blog = this.find(id)!
+        const blog = this.findBlog(id)
+        if (!blog) {
+            throw new Error('Blog not found');
+        }
         return this.map(blog);
     },
-    updateBlogs(id: number, title: string) {
-        let blog = blogs.find(b => b.id === id);
-        if (blog) {
-            blog.title = title;
+    updateBlog(id: string, blog: Partial<BlogDbType | null>) {
+        const index = db.blogs.findIndex(b => b.id === id);
+        if (index !== -1) {
+            db.blogs[index] = {...db.blogs[index], ...blog};
             return true;
         } else {
             return false;
         }
     },
-    deleteBlog (id: number) {
-        for (let i = 0; i < blogs.length; i++) {
-            if (blogs[i].id === id) {
-                blogs.splice(i, 1);
-                return true;
-            }
+    deleteBlog(id: string) {
+        const index = db.blogs.findIndex(b => b.id === id);
+        if (index !== -1) {
+            db.blogs.splice(index, 1);
+            return true;
+        } else {
+            return false;
         }
-        return false;
     },
     map(blog: BlogDbType) {
         const blogForOutput: BlogViewModel = {
@@ -51,3 +60,5 @@ export const blogsRepository = {
         return blogForOutput;
     }
 }
+
+

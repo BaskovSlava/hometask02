@@ -1,29 +1,25 @@
-import {validationResult} from 'express-validator'
-import {NextFunction,Request,Response} from "express";
-
-
-export const inputCheckErrorsMiddleware = (req: Request, res: Response, next: NextFunction) =>
-{
-    const errors = validationResult(req)
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.inputCheckErrorsMiddleware = void 0;
+const express_validator_1 = require("express-validator");
+const inputCheckErrorsMiddleware = (req, res, next) => {
+    const errors = (0, express_validator_1.validationResult)(req);
     if (!errors.isEmpty()) {
         res
             .status(400)
             .json({
-                errorsMessages: errors
-                    .array({onlyFirstError: true})
-                    .map((err) => {
-                        return {message: err.msg, field: (err as any).path}
-                    }),
-            })
-
-    } else {
-        next()
+            errorsMessages: errors
+                .array({ onlyFirstError: true })
+                .map((err) => {
+                return { message: err.msg, field: err.path };
+            }),
+        });
     }
-
-}
-
-
+    else {
+        next();
+    }
+};
+exports.inputCheckErrorsMiddleware = inputCheckErrorsMiddleware;
 //
 //
 // import {Request, Response, NextFunction} from "express";
