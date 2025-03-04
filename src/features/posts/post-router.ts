@@ -1,50 +1,51 @@
-import {Router, Request, Response, NextFunction} from "express";
+import {Router, Request, Response} from "express";
 import {postsRepository} from "./post-repository";
-import {PostInputModel, PostViewModel} from "../../input-output-types/posts-types";
-import {postValidators, findPostValidator, postIdValidator} from "./middlewares/postValidators";
+// import {PostInputModel, PostViewModel} from "../../input-output-types/posts-types";
+import {postValidators, postIdValidator} from "./middlewares/postValidators";
 import {adminMiddleware} from "../../middlewares/admin-middleware";
 import {inputCheckErrorsMiddleware} from "../../middlewares/inputCheckErrorsMiddlewares";
 
 export const postsRouter = Router();
 
 export const postsController = {
-    getPosts(req: Request, res: Response<PostViewModel[]>) {
-        const posts = postsRepository.getPosts();
+    async getPosts(req: Request, res: Response) {
+        const posts = await postsRepository.getPosts();
         res.status(200).json(posts);
     },
-    createPost(req: Request<any, any, PostInputModel>, res: Response<PostViewModel>) {
-        const newPostId = postsRepository.createPost(req.body);
-        const newPost = postsRepository.findPostAndMap(newPostId);
-
+    async createPost(req: Request, res: Response) {
+        const newPost = await postsRepository.createPost(req.body);
         res
             .status(201)
             .json(newPost);
     },
-    findPost(req: Request<{ id: string }>, res: Response<PostViewModel | {}>) {
-        const post = postsRepository.findPost(req.params.id);
-        post ?
+    async findPost(req: Request, res: Response) {
+        const post = await postsRepository.findPost(req.params.id);
+        if(!post) {
+            res
+                .sendStatus(404)
+            return
+        }
             res
                 .status(200)
                 .json(post)
-            : res
-                .sendStatus(404)
+
     },
-    updatePost(req: Request<{ id: string }>, res: Response<PostViewModel | {}>) {
-        const updated = postsRepository.updatePost(req.params.id, req.body);
-        if (updated) {
-            const post = postsRepository.findPost(req.params.id);
-            res.sendStatus(204);
-        } else {
+    async updatePost(req: Request, res: Response) {
+        const updated = await postsRepository.updatePost(req.params.id, req.body);
+        if (!updated) {
+            // const post = postsRepository.findPost(req.params.id);
             res.sendStatus(404);
+            return
         }
+            res.sendStatus(204);
     },
-    deletePost(req: Request<{ id: string }>, res: Response) {
-        const isDeleted = postsRepository.deletePost(req.params.id);
-        if (isDeleted) {
-            res.send(204);
-        } else {
+    async deletePost(req: Request, res: Response) {
+        const isDeleted = await postsRepository.deletePost(req.params.id);
+        if (!isDeleted) {
             res.send(404);
+            return
         }
+            res.send(204);
     }
 }
 

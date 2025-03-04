@@ -10,17 +10,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blogsRepository = void 0;
+const db_1 = require("../../db/db");
 const node_crypto_1 = require("node:crypto");
-const mongo_db_1 = require("../../db/mongo-db");
 exports.blogsRepository = {
     getBlogs() {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield mongo_db_1.blogCollection.find({}).toArray();
-            let arResult = [];
-            for (let i = 0; i < result.length; i++) {
-                arResult.push(this.map(result[i]));
-            }
-            return arResult;
+            return db_1.db.blogs;
         });
     },
     createBlog(blog) {
@@ -33,35 +28,43 @@ exports.blogsRepository = {
                 createdAt: new Date().toISOString(),
                 isMembership: false,
             };
-            yield mongo_db_1.blogCollection.insertOne(newBlog);
-            return this.map(newBlog);
+            db_1.db.blogs = [...db_1.db.blogs, newBlog];
+            return newBlog;
         });
     },
     findBlog(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const blog = yield mongo_db_1.blogCollection.findOne({ id: id });
+            const blog = db_1.db.blogs.find(blog => blog.id === id);
             if (blog) {
-                return this.map(blog);
+                return blog;
             }
-            return null;
+            else {
+                return null;
+            }
         });
     },
     updateBlog(id, blog) {
         return __awaiter(this, void 0, void 0, function* () {
-            let result = yield mongo_db_1.blogCollection.updateOne({ id: id }, {
-                $set: {
-                    name: blog.name,
-                    description: blog.description,
-                    websiteUrl: blog.websiteUrl,
-                }
-            });
-            return result.matchedCount === 1;
+            const index = db_1.db.blogs.findIndex(b => b.id === id);
+            if (index !== -1) {
+                db_1.db.blogs[index] = Object.assign(Object.assign({}, db_1.db.blogs[index]), blog);
+                return true;
+            }
+            else {
+                return false;
+            }
         });
     },
     deleteBlog(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield mongo_db_1.blogCollection.deleteOne({ id: id });
-            return result.deletedCount === 1;
+            const index = db_1.db.blogs.findIndex(b => b.id === id);
+            if (index !== -1) {
+                db_1.db.blogs.splice(index, 1);
+                return true;
+            }
+            else {
+                return false;
+            }
         });
     },
     map(blog) {

@@ -2,17 +2,10 @@ import {db} from '../../db/db'
 import {BlogDbType} from "../../db/blog-db-type";
 import {BlogInputModel, BlogViewModel} from "../../input-output-types/blogs-types";
 import {randomUUID} from "node:crypto";
-import {blogCollection} from "../../db/mongo-db";
-
 
 export const blogsRepository = {
     async getBlogs(): Promise<BlogDbType[]> {
-        const result = await blogCollection.find({}).toArray();
-        let arResult = [];
-        for (let i = 0; i < result.length; i++) {
-            arResult.push(this.map(result[i]));
-        }
-        return arResult;
+        return db.blogs
     },
     async createBlog(blog: BlogInputModel): Promise<BlogDbType> {
         const newBlog: BlogDbType = {
@@ -23,32 +16,37 @@ export const blogsRepository = {
             createdAt: new Date().toISOString(),
             isMembership: false,
         }
-        await blogCollection.insertOne(newBlog);
-        return this.map(newBlog);
+        db.blogs = [...db.blogs, newBlog];
+        return newBlog;
     },
     async findBlog(id: string): Promise<BlogDbType | null> {
-        const blog = await blogCollection.findOne({id: id});
+        const blog = db.blogs.find(blog => blog.id === id);
         if (blog) {
-            return this.map(blog);
+            return blog;
+        } else {
+            return null
         }
-        return null;
     },
-    async updateBlog(id: string, blog: Partial<BlogDbType>): Promise<boolean> {
-       let result = await blogCollection.updateOne({id: id},{
-           $set: {
-               name: blog.name,
-               description: blog.description,
-               websiteUrl: blog.websiteUrl,
-           }
-       })
-        return result.matchedCount === 1
+    async updateBlog(id: string, blog: Promise<BlogDbType | null>) {
+        const index = db.blogs.findIndex(b => b.id === id);
+        if (index !== -1) {
+            db.blogs[index] = {...db.blogs[index], ...blog};
+            return true;
+        } else {
+            return false;
+        }
     },
-    async deleteBlog(id: string): Promise<boolean> {
-        const result = await blogCollection.deleteOne({id: id});
-        return result.deletedCount === 1
+    async deleteBlog(id: string): Promise<BlogDbType | boolean> {
+        const index = db.blogs.findIndex(b => b.id === id);
+        if (index !== -1) {
+            db.blogs.splice(index, 1);
+            return true;
+        } else {
+            return false;
+        }
     },
     map(blog: BlogDbType) {
-        const blogForOutput: BlogDbType = {
+        const blogForOutput: BlogViewModel = {
             id: blog.id,
             description: blog.description,
             websiteUrl: blog.websiteUrl,

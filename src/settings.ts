@@ -12,4 +12,6 @@ export const SETTINGS = {
         LOGIN:'admin',
         PASSWORD: 'qwerty'
     },
+    MONGO_URL: process.env.MONGO_URL || 'mongodb://localhost:27017',
+    DB_NAME: process.env.DB_NAME || 'blogs-platform',
 }

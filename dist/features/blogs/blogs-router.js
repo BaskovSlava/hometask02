@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blogsController = exports.blogsRouter = void 0;
 const express_1 = require("express");
@@ -9,43 +18,52 @@ const admin_middleware_1 = require("../../middlewares/admin-middleware");
 exports.blogsRouter = (0, express_1.Router)();
 exports.blogsController = {
     getBlogs(req, res) {
-        const blogs = blogs_repository_1.blogsRepository.getBlogs();
-        res.status(200).json(blogs);
+        return __awaiter(this, void 0, void 0, function* () {
+            const blogs = yield blogs_repository_1.blogsRepository.getBlogs();
+            res.status(200).json(blogs);
+        });
     },
     createBlog(req, res) {
-        const newBlogId = blogs_repository_1.blogsRepository.createBlog(req.body);
-        const newBlog = blogs_repository_1.blogsRepository.findBlogAndMap(newBlogId);
-        res
-            .status(201)
-            .send(newBlog);
+        return __awaiter(this, void 0, void 0, function* () {
+            const newBlog = yield blogs_repository_1.blogsRepository.createBlog(req.body);
+            res
+                .status(201)
+                .send(newBlog);
+        });
     },
     findBlog(req, res) {
-        const blog = blogs_repository_1.blogsRepository.findBlog(req.params.id);
-        blog ?
+        return __awaiter(this, void 0, void 0, function* () {
+            const blog = yield blogs_repository_1.blogsRepository.findBlog(req.params.id);
+            if (!blog) {
+                res
+                    .sendStatus(404);
+                return;
+            }
             res
                 .status(200)
-                .json(blog)
-            : res
-                .sendStatus(404);
+                .json(blog);
+        });
     },
     updateBlog(req, res) {
-        const updated = blogs_repository_1.blogsRepository.updateBlog(req.params.id, req.body);
-        // const blog = blogsRepository.findBlog(req.params.id);
-        if (updated) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const updated = yield blogs_repository_1.blogsRepository.updateBlog(req.params.id, req.body);
+            // const blog = blogsRepository.findBlog(req.params.id);
+            if (!updated) {
+                res.sendStatus(404);
+                return;
+            }
             res.sendStatus(204);
-        }
-        else {
-            res.sendStatus(404);
-        }
+        });
     },
     deleteBlog(req, res) {
-        const isDeleted = blogs_repository_1.blogsRepository.deleteBlog(req.params.id);
-        if (isDeleted) {
-            res.send(204).json();
-        }
-        else {
-            res.send(404).json();
-        }
+        return __awaiter(this, void 0, void 0, function* () {
+            const isDeleted = yield blogs_repository_1.blogsRepository.deleteBlog(req.params.id);
+            if (!isDeleted) {
+                res.sendStatus(404);
+                return;
+            }
+            res.sendStatus(204);
+        });
     }
 };
 exports.blogsRouter.get('/', exports.blogsController.getBlogs);

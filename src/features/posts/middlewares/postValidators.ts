@@ -4,6 +4,7 @@ import {postsRepository} from "../post-repository";
 import {adminMiddleware} from "../../../middlewares/admin-middleware";
 import {inputCheckErrorsMiddleware} from "../../../middlewares/inputCheckErrorsMiddlewares";
 import {NextFunction, Request, Response} from "express";
+import {BlogDbType} from "../../../db/blog-db-type";
 
 // title: string // max 30
 // shortDescription: string // max 100
@@ -27,10 +28,17 @@ export const postIdValidator = param('id')
     .notEmpty().withMessage('id is required')
     .trim()
 
-export const blogIdValidator = body('blogId').isString().withMessage('not string')
-    .trim().custom(blogId => {
-        const blog = blogsRepository.findBlog(blogId)
-        return !!blog
+export const blogIdValidator = body('blogId').isString().withMessage('blogId should be a string')
+    .notEmpty().withMessage('blogId is requires').custom(async blogId => {
+        const blog: BlogDbType | null = await blogsRepository.findBlog(blogId)
+
+        if (blog){
+            return true
+        } else {
+            return Promise.reject();
+        }
+
+        // return !!blog
     }).withMessage('no blog')
 
 export const findPostValidator = (req: Request<{ id: string }>, res: Response, next: NextFunction) => {

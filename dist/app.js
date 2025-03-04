@@ -11,7 +11,6 @@ const blogs_router_1 = require("./features/blogs/blogs-router");
 const post_router_1 = require("./features/posts/post-router");
 const testing_1 = require("./features/testing");
 exports.app = (0, express_1.default)();
-// можно писать кастомные промежуточные слои
 exports.app.use(express_1.default.json());
 exports.app.use((0, cors_1.default)());
 exports.app.get("/", (req, res, next) => {

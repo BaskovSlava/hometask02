@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.postValidators = exports.findPostValidator = exports.blogIdValidator = exports.postIdValidator = exports.contentValidator = exports.shortDescriptionValidator = exports.titleValidator = void 0;
 const express_validator_1 = require("express-validator");
@@ -23,11 +32,17 @@ exports.postIdValidator = (0, express_validator_1.param)('id')
     .isString().withMessage('id should be a string')
     .notEmpty().withMessage('id is required')
     .trim();
-exports.blogIdValidator = (0, express_validator_1.body)('blogId').isString().withMessage('not string')
-    .trim().custom(blogId => {
-    const blog = blogs_repository_1.blogsRepository.findBlog(blogId);
-    return !!blog;
-}).withMessage('no blog');
+exports.blogIdValidator = (0, express_validator_1.body)('blogId').isString().withMessage('blogId should be a string')
+    .notEmpty().withMessage('blogId is requires').custom((blogId) => __awaiter(void 0, void 0, void 0, function* () {
+    const blog = yield blogs_repository_1.blogsRepository.findBlog(blogId);
+    if (blog) {
+        return true;
+    }
+    else {
+        return Promise.reject();
+    }
+    // return !!blog
+})).withMessage('no blog');
 const findPostValidator = (req, res, next) => {
     const post = post_repository_1.postsRepository.findPost(req.params.id);
     if (!post) {

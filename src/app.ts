@@ -8,8 +8,6 @@ import {testingRouter} from "./features/testing";
 
 export const app = express();
 
-// можно писать кастомные промежуточные слои
-
 app.use(express.json());
 app.use(cors())
 

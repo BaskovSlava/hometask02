@@ -18,14 +18,19 @@ export const blog1 = {
     name: 'n1',
     description: 'd1',
     websiteUrl: 'http://some.com',
-} as const; // dataset нельзя изменять
+    createAt: '2025-03-01T20:04:00.000Z',
+    isMembership: false,
+}   as const; // dataset нельзя изменять
 
 export const blog2 = {
     id: new Date().toISOString() + Math.random(),
     name: 'n2',
     description: 'd2',
     websiteUrl: 'http://some2.com',
-} as const; // Нельзя менять dataset
+    createAt: '2025-03-01T20:04:00.000Z',
+    isMembership: false,
+
+}  as const; // Нельзя менять dataset
 
 export const post1 = {
     id: new Date().toISOString() + Math.random(),
@@ -33,13 +38,15 @@ export const post1 = {
     content: 'c1',
     shortDescription: 's2',
     blogId: blog1.id,
-    blogName: 'n1'
-} as const
+    blogName: 'n1',
+    createdAt: new Date().toISOString()
+}  as const
 
 export const dataset1 = {
     blogs: [blog1],
     posts: [],
-} as const
+}  as const
+
 export const dataset2 = {
     blogs: [blog1, blog2],
     posts: [post1],
